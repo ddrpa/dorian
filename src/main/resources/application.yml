@@ -1,0 +1,31 @@
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/master.xml
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    # ？open-in-view=true 会导致 JPA 在每一个 web session 中开启数据库连接和事务，覆盖代码中的事务声明
+    open-in-view: false
+
+server:
+  port: 8080
+
+logging:
+  config: classpath:logback-prod.xml
+
+management:
+  tracing:
+    sampling:
+      probability: 0.1
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+

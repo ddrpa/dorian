@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="30 seconds" packagingData="true">
+    <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
+        <!-- https://logback.qos.ch/xref/ch/qos/logback/classic/net/SyslogAppender.html -->
+        <syslogHost>localhost</syslogHost>
+        <port>514</port>
+        <facility>LOCAL0</facility>
+    </appender>
+    <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- https://logback.qos.ch/xref/ch/qos/logback/core/rolling/RollingFileAppender.html-->
+        <file>logs/app.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%date{ISO8601} %-5level [%thread,%mdc{traceId:-},%mdc{spanId:-}] %logger{36} -%kvp{NONE}- %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 日志每日归档，通过 Gzip 压缩 -->
+            <fileNamePattern>logs/%d{yyyyMM, aux}/app.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <!-- 每 20MB 触发归档 -->
+            <maxFileSize>20MB</maxFileSize>
+            <!-- 不删除旧日志 -->
+            <maxHistory>0</maxHistory>
+            <!-- 除非总体积超过 10GB -->
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    <variable name="CLS_ENDPOINT" value="ap-guangzhou.cls.tencentcs.com"/>
+    <appender name="LOGHUB" class="com.tencentcloudapi.cls.LoghubAppender">
+        <endpoint>${CLS_ENDPOINT}</endpoint>
+        <accessKeyId>${env:CLS_ACCESS_KEY_ID}</accessKeyId>
+        <accessKeySecret>${env:CLS_ACCESS_KEY_SECRET}</accessKeySecret>
+        <topicId>${env:CLS_TOPIC_ID}</topicId>
+        <!-- 单个 producer 实例能缓存的日志大小上限，默认为 100MB -->
+        <totalSizeInBytes>104857600</totalSizeInBytes>
+        <!-- 如果 producer 可用空间不足，调用者在 send 方法上的最大阻塞时间，默认为 60 秒。为了不阻塞打印日志的线程，建议设置成 0 -->
+        <maxBlockMs>0</maxBlockMs>
+        <!-- 执行日志发送任务的线程池大小，默认为可用处理器个数 -->
+        <sendThreadCount>2</sendThreadCount>
+        <!-- 当一个 ProducerBatch 中缓存的日志大小大于等于 batchSizeThresholdInBytes 时，该 batch 将被发送，默认为 512 KB，最大可设置成 5MB -->
+        <batchSizeThresholdInBytes>524288</batchSizeThresholdInBytes>
+        <!-- 当一个 ProducerBatch 中缓存的日志条数大于等于 batchCountThreshold 时，该 batch 将被发送，默认为 4096，最大可设置成 40960 -->
+        <batchCountThreshold>4096</batchCountThreshold>
+        <!-- 一个 ProducerBatch 从创建到可发送的逗留时间，默认为 2 秒，最小可设置成 100 毫秒 -->
+        <lingerMs>2000</lingerMs>
+        <!-- 如果某个 ProducerBatch 首次发送失败，能够对其重试的次数，默认为 10 次，小于等于 0 不重试 -->
+        <retries>10</retries>
+        <!-- 首次重试的退避时间，默认为 100 毫秒，采用指数退避算法，第 N 次重试的计划等待时间为 baseRetryBackoffMs * 2^(N-1) -->
+        <baseRetryBackoffMs>100</baseRetryBackoffMs>
+        <!-- 重试的最大退避时间，默认为 50 秒 -->
+        <maxRetryBackoffMs>50000</maxRetryBackoffMs>
+        <!-- 设置时间格式 -->
+        <timeFormat>yyyy-MM-dd'T'HH:mm:ssZ</timeFormat>
+        <timeZone>Asia/Shanghai</timeZone>
+        <encoder>
+            <pattern>%-5level [%thread,%mdc{traceId:-},%mdc{spanId:-}] %logger{36} -%kvp{NONE}- %msg%n</pattern>
+        </encoder>
+        <!-- TODO SLF4J MDC -->
+        <mdcFields>THREAD_ID,MDC_KEY</mdcFields>
+    </appender>
+    <root level="WARN">
+        <appender-ref ref="ROLLING_FILE"/>
+    </root>
+    <logger name="cc.ddrpa.dorian" level="WARN">
+        <appender-ref ref="ROLLING_FILE"/>
+    </logger>
+</configuration>

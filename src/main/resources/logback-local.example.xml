@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration packagingData="true">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{ISO8601} %-5level [%thread,%mdc{traceId:-},%mdc{spanId:-}] %logger{36} -%kvp{NONE}- %msg%n</pattern>
+        </encoder>
+    </appender>
+    <root level="WARN">
+        <appender-ref ref="STDOUT"/>
+    </root>
+    <logger name="cc.ddrpa.dorian" level="TRACE">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+</configuration>

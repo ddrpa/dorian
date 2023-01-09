@@ -1,0 +1,8 @@
+.idea/*
+logs/*
+target/*
+*.DS_Store*
+*.git*
+*.zip
+src/main/resources/application-local.yml
+src/main/resources/log4j2-local.yml

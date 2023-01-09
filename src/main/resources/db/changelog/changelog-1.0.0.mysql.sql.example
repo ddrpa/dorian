@@ -1,0 +1,36 @@
+-- liquibase formatted sql
+
+-- changeset yufan:202212132050
+-- comment 建立 post 表
+create table tbl_post
+(
+    id          bigint       not null,
+    title       varchar(255) not null,
+    create_time datetime     not null,
+    constraint pk_tbl_post primary key (id)
+);
+-- rollback drop table tbl_post;
+
+-- changeset yufan:202212132051
+-- comment 为 post 表添加数据，但是不推荐在 changeset 中做这种添加初始化数据的工作
+insert into tbl_post (id, title, create_time)
+values  (1, '天文学家确认至今观测到的最古老星系', '2019-01-01 00:00:00'),
+        (2, '恐惧的记忆如何长期保存下来', '2020-01-01 00:00:00'),
+        (3, 'DeepMind 的 AlphaCode 在编程竞赛中达到人类水平', '2021-01-01 00:00:00'),
+        (4, 'Linux 6.1 释出', '2022-01-01 00:00:00');
+-- rollback delete from tbl_post where id in (1,2,3,4);
+
+-- changeset yufan:202212132052
+-- comment 修改 post 表添加 deleted 列，在 rollback 中删除该列
+alter table tbl_post add column deleted bit(1) not null default b'0';
+-- rollback alter table tbl_post drop column deleted;
+
+-- changeset yufan:202212132053
+-- comment 添加 user 表
+create table tbl_user
+(
+    id          bigint       not null,
+    name        varchar(255) not null,
+    constraint pk_tbl_user primary key (id)
+);
+-- rollback drop table tbl_user;
